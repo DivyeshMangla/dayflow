@@ -1,3 +1,4 @@
+import 'package:dayflow/screens/tasks_screen.dart';
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 
@@ -18,7 +19,7 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.black,
         useMaterial3: true,
       ),
-      home: const HomeScreen(),
+      home: const TasksScreen(),
     );
   }
 }
