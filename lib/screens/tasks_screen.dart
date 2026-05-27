@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:dayflow/model/task.dart';
 import 'package:dayflow/repository/task_repository.dart';
 import 'package:dayflow/services/task_service.dart';
-import 'package:dayflow/widgets/bottom_navbar.dart';
 import 'package:dayflow/widgets/task_list.dart';
 
 class TasksScreen extends StatefulWidget {
@@ -44,8 +43,6 @@ class _TasksScreenState extends State<TasksScreen> {
 
     return Scaffold(
       backgroundColor: Colors.black,
-
-      bottomNavigationBar: const BottomNavbar(),
 
       body: SafeArea(
         child: Padding(

@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 
 class BottomNavbar extends StatelessWidget {
-  const BottomNavbar({super.key});
+  final int selectedIndex;
+  final Function(int) onTabSelected;
+
+  const BottomNavbar({
+    super.key,
+    required this.selectedIndex,
+    required this.onTabSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -14,8 +21,8 @@ class BottomNavbar extends StatelessWidget {
         bottom: 12,
       ),
 
-      decoration: BoxDecoration(
-        color: const Color(0xFF121212),
+      decoration: const BoxDecoration(
+        color: Color(0xFF121212),
 
         border: Border(
           top: BorderSide(
@@ -30,33 +37,33 @@ class BottomNavbar extends StatelessWidget {
 
         children: [
           navItem(
+            index: 0,
             icon: Icons.check_circle_outline_rounded,
             label: 'Tasks',
-            color: Colors.white,
           ),
 
           navItem(
+            index: 1,
             icon: Icons.self_improvement_rounded,
             label: 'Focus',
-            color: Colors.white54,
           ),
 
           navItem(
+            index: 2,
             icon: Icons.repeat_rounded,
             label: 'Routine',
-            color: Colors.white54,
           ),
 
           navItem(
+            index: 3,
             icon: Icons.local_fire_department_outlined,
             label: 'Habits',
-            color: Colors.white54,
           ),
 
           navItem(
+            index: 4,
             icon: Icons.alarm_rounded,
             label: 'Alarm',
-            color: Colors.white54,
           ),
         ],
       ),
@@ -64,32 +71,43 @@ class BottomNavbar extends StatelessWidget {
   }
 
   Widget navItem({
+    required int index,
     required IconData icon,
     required String label,
-    required Color color,
   }) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
+    final isSelected = selectedIndex == index;
 
-      children: [
-        Icon(
-          icon,
-          color: color,
-          size: 24,
-        ),
+    final color = isSelected
+        ? Colors.white
+        : Colors.white54;
 
-        const SizedBox(height: 4),
+    return GestureDetector(
+      onTap: () => onTabSelected(index),
 
-        Text(
-          label,
-          style: TextStyle(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+
+        children: [
+          Icon(
+            icon,
             color: color,
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
+            size: 24,
           ),
-        ),
-      ],
+
+          const SizedBox(height: 4),
+
+          Text(
+            label,
+
+            style: TextStyle(
+              color: color,
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
