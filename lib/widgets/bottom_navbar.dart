@@ -13,7 +13,7 @@ class BottomNavbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 82,
+      height: 88,
 
       padding: const EdgeInsets.only(
         left: 12,
@@ -78,35 +78,45 @@ class BottomNavbar extends StatelessWidget {
     final isSelected = selectedIndex == index;
 
     final color = isSelected
-        ? Colors.white
+        ? const Color(0xFF7EB88A)
         : Colors.white54;
 
-    return GestureDetector(
-      onTap: () => onTabSelected(index),
-
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-
-        children: [
-          Icon(
-            icon,
-            color: color,
-            size: 24,
-          ),
-
-          const SizedBox(height: 4),
-
-          Text(
-            label,
-
-            style: TextStyle(
-              color: color,
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => onTabSelected(index),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, color: color),
+                const SizedBox(height: 4),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
+
+            Positioned(
+              bottom: 4,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeInOut,
+                height: 4,
+                width: isSelected ? 24 : 0,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF7EB88A),
+                  borderRadius: BorderRadius.circular(100),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
