@@ -17,7 +17,6 @@ class _AlarmCardState extends State<AlarmCard> {
       height: 138,
 
       margin: const EdgeInsets.symmetric(
-        horizontal: 12,
         vertical: 10,
       ),
 
@@ -58,7 +57,7 @@ class _AlarmCardState extends State<AlarmCard> {
 
             _buildLabelText("Morning Chimes"),
             Padding(
-              padding: const EdgeInsets.only(top: 4),
+              padding: const EdgeInsets.only(top: 8),
               child: _buildDayRow([1, 2, 3, 4, 5]),
             ),
           ],
@@ -76,6 +75,7 @@ class _AlarmCardState extends State<AlarmCard> {
         fontWeight: FontWeight.w700,
         fontSize: 38,
         letterSpacing: -0.3,
+        height: 1.0,
       ),
     );
   }
