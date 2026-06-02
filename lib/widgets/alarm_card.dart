@@ -72,7 +72,7 @@ class _AlarmCardState extends State<AlarmCard> {
       text,
 
       style: GoogleFonts.inter(
-        color: Colors.white,
+        color: _isEnabled ? Colors.white : Colors.grey.shade800,
         fontWeight: FontWeight.w700,
         fontSize: 38,
         letterSpacing: -0.3,
