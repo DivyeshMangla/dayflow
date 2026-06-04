@@ -1,4 +1,5 @@
 import 'package:dayflow/screens/alarm_screen.dart';
+import 'package:dayflow/repository/alarm_repository.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dayflow/screens/focus_screen.dart';
@@ -19,17 +20,20 @@ class _AppShellState extends State<AppShell> {
   int selectedIndex = 0;
 
   late final List<Widget> pages;
+  late final AlarmRepository alarmRepository;
 
   @override
   void initState() {
     super.initState();
 
-    pages = const [
-      TasksScreen(),
-      FocusScreen(),
-      RoutineScreen(),
-      HabitsScreen(),
-      AlarmScreen(),
+    alarmRepository = AlarmRepository();
+
+    pages = [
+      const TasksScreen(),
+      const FocusScreen(),
+      const RoutineScreen(),
+      const HabitsScreen(),
+      AlarmScreen(alarmRepository: alarmRepository),
     ];
   }
 

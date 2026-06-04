@@ -1,8 +1,12 @@
+import 'package:dayflow/model/alarm.dart';
+import 'package:dayflow/repository/alarm_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class NewAlarmScreen extends StatefulWidget {
-  const NewAlarmScreen({super.key});
+  const NewAlarmScreen({super.key, required this.alarmRepository});
+
+  final AlarmRepository alarmRepository;
 
   @override
   State<NewAlarmScreen> createState() => _NewAlarmScreenState();
@@ -20,6 +24,27 @@ class _NewAlarmScreenState extends State<NewAlarmScreen> {
   final List<int> repeatDays = [];
 
   static const green = Color(0xFF7EB88A);
+
+  Future<void> _saveAlarm() async {
+    final savedHour = isAM ? hour % 12 : (hour % 12) + 12;
+
+    await widget.alarmRepository.saveAlarm(
+      Alarm(
+        id: DateTime.now().microsecondsSinceEpoch.toString(),
+        hour: savedHour,
+        minute: minute,
+        enabled: true,
+        repeatDays: repeatDays,
+        label: label.trim().isEmpty ? 'Alarm' : label.trim(),
+        vibrate: snoozeEnabled,
+        ringtone: 'SomeMusic',
+      ),
+    );
+
+    if (mounted) {
+      Navigator.pop(context, true);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,18 +118,14 @@ class _NewAlarmScreenState extends State<NewAlarmScreen> {
     return Container(
       height: 58,
 
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
 
       decoration: BoxDecoration(
         color: const Color(0xFF161618),
 
         borderRadius: BorderRadius.circular(16),
 
-        border: Border.all(
-          color: const Color(0xFF2A2A2E),
-        ),
+        border: Border.all(color: const Color(0xFF2A2A2E)),
       ),
 
       child: Row(
@@ -140,32 +161,23 @@ class _NewAlarmScreenState extends State<NewAlarmScreen> {
     );
   }
 
-  Widget _buildSoundTile({
-    required String soundName,
-  }) {
+  Widget _buildSoundTile({required String soundName}) {
     return Container(
       height: 58,
 
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
 
       decoration: BoxDecoration(
         color: const Color(0xFF161618),
 
         borderRadius: BorderRadius.circular(16),
 
-        border: Border.all(
-          color: const Color(0xFF2A2A2E),
-        ),
+        border: Border.all(color: const Color(0xFF2A2A2E)),
       ),
 
       child: Row(
         children: [
-          Icon(
-            Icons.volume_up_rounded,
-            color: Colors.grey.shade600,
-          ),
+          Icon(Icons.volume_up_rounded, color: Colors.grey.shade600),
 
           const SizedBox(width: 12),
 
@@ -209,9 +221,7 @@ class _NewAlarmScreenState extends State<NewAlarmScreen> {
       decoration: InputDecoration(
         hintText: 'eg. Morning Yoga',
 
-        hintStyle: GoogleFonts.inter(
-          color: Colors.grey.shade600,
-        ),
+        hintStyle: GoogleFonts.inter(color: Colors.grey.shade600),
 
         filled: true,
         fillColor: const Color(0xFF161618),
@@ -224,19 +234,13 @@ class _NewAlarmScreenState extends State<NewAlarmScreen> {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
 
-          borderSide: BorderSide(
-            color: green,
-            width: 2,
-          ),
+          borderSide: BorderSide(color: green, width: 2),
         ),
 
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
 
-          borderSide: const BorderSide(
-            color: Color(0xFF2A2A2E),
-            width: 1,
-          ),
+          borderSide: const BorderSide(color: Color(0xFF2A2A2E), width: 1),
         ),
       ),
     );
@@ -270,9 +274,7 @@ class _NewAlarmScreenState extends State<NewAlarmScreen> {
               shape: BoxShape.circle,
               border: isActive
                   ? null
-                  : Border.all(
-                color: const Color(0xFF2A2A2E),
-              ),
+                  : Border.all(color: const Color(0xFF2A2A2E)),
             ),
             child: Center(
               child: Text(
@@ -280,9 +282,7 @@ class _NewAlarmScreenState extends State<NewAlarmScreen> {
                 style: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: isActive
-                      ? Colors.black
-                      : Colors.grey.shade500,
+                  color: isActive ? Colors.black : Colors.grey.shade500,
                 ),
               ),
             ),
@@ -300,9 +300,7 @@ class _NewAlarmScreenState extends State<NewAlarmScreen> {
       decoration: BoxDecoration(
         color: const Color(0xFF151518),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFF232328),
-        ),
+        border: Border.all(color: const Color(0xFF232328)),
       ),
       child: Row(
         children: [
@@ -397,9 +395,7 @@ class _NewAlarmScreenState extends State<NewAlarmScreen> {
         decoration: BoxDecoration(
           color: const Color(0xFF151518),
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: const Color(0xFF232328),
-          ),
+          border: Border.all(color: const Color(0xFF232328)),
         ),
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -413,9 +409,7 @@ class _NewAlarmScreenState extends State<NewAlarmScreen> {
                       Icons.keyboard_arrow_up,
                       color: Colors.grey,
                     ),
-                    onPressed: () => onChanged(
-                      value >= max ? 0 : value + 1,
-                    ),
+                    onPressed: () => onChanged(value >= max ? 0 : value + 1),
                   ),
                 ),
 
@@ -434,9 +428,7 @@ class _NewAlarmScreenState extends State<NewAlarmScreen> {
                       Icons.keyboard_arrow_down,
                       color: Colors.grey,
                     ),
-                    onPressed: () => onChanged(
-                      value <= 0 ? max : value - 1,
-                    ),
+                    onPressed: () => onChanged(value <= 0 ? max : value - 1),
                   ),
                 ),
               ],
@@ -461,16 +453,11 @@ class _NewAlarmScreenState extends State<NewAlarmScreen> {
 
         const Spacer(),
 
-        _headerText('Save', green),
+        GestureDetector(onTap: _saveAlarm, child: _headerText('Save', green)),
       ],
     );
   }
 
-  Widget _headerText(String text, Color color) => Text(
-    text,
-    style: TextStyle(
-      color: color,
-      fontSize: 20,
-    ),
-  );
+  Widget _headerText(String text, Color color) =>
+      Text(text, style: TextStyle(color: color, fontSize: 20));
 }

@@ -1,10 +1,33 @@
+import 'package:dayflow/model/alarm.dart';
+import 'package:dayflow/repository/alarm_repository.dart';
 import 'package:dayflow/screens/new_alarm_screen.dart';
 import 'package:dayflow/widgets/alarm_card.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class AlarmScreen extends StatelessWidget {
-  const AlarmScreen({super.key});
+class AlarmScreen extends StatefulWidget {
+  const AlarmScreen({super.key, required this.alarmRepository});
+
+  final AlarmRepository alarmRepository;
+
+  @override
+  State<AlarmScreen> createState() => _AlarmScreenState();
+}
+
+class _AlarmScreenState extends State<AlarmScreen> {
+  late Future<List<Alarm>> _alarmsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _alarmsFuture = widget.alarmRepository.getAlarms();
+  }
+
+  void _refreshAlarms() {
+    setState(() {
+      _alarmsFuture = widget.alarmRepository.getAlarms();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,80 +36,79 @@ class AlarmScreen extends StatelessWidget {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildBedtimeLabel(),
+          child: FutureBuilder<List<Alarm>>(
+            future: _alarmsFuture,
+            builder: (context, snapshot) {
+              final alarms = snapshot.data ?? [];
+              final nextAlarm = _nextEnabledAlarm(alarms);
 
-              const SizedBox(height: 10),
-
-              _buildNextAlarmTime(),
-
-              const SizedBox(height: 10),
-
-              _buildNextAlarmLabel(),
-
-              const SizedBox(height: 16),
-
-              _buildUtilityBar(),
-
-              const SizedBox(height: 24),
-
-              _buildAlarmLabel(context),
-
-              const SizedBox(height: 8),
-
-              _buildAlarmList(),
-            ],
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildBedtimeLabel(),
+                  const SizedBox(height: 10),
+                  _buildNextAlarmTime(nextAlarm),
+                  const SizedBox(height: 10),
+                  _buildNextAlarmLabel(nextAlarm),
+                  const SizedBox(height: 16),
+                  _buildUtilityBar(),
+                  const SizedBox(height: 24),
+                  _buildAlarmLabel(context, alarms.length),
+                  const SizedBox(height: 8),
+                  _buildAlarmList(alarms),
+                ],
+              );
+            },
           ),
         ),
       ),
     );
   }
 
-  Widget _buildNextAlarmTime() {
-    return const Text(
-      '6:45 AM',
-      style: TextStyle(
+  Widget _buildNextAlarmTime(Alarm? alarm) {
+    return Text(
+      alarm == null ? '--:--' : _formatTime(alarm),
+      style: const TextStyle(
         color: Colors.white,
         fontSize: 42,
         fontWeight: FontWeight.w600,
-        height: 1
+        height: 1,
       ),
     );
   }
 
-  Widget _buildAlarmLabel(BuildContext context) {
+  Widget _buildAlarmLabel(BuildContext context, int count) {
     return Row(
       children: [
         Text(
-          "ALL ALARMS",
+          'ALL ALARMS',
           style: GoogleFonts.inter(
             color: Colors.grey.shade700,
             fontWeight: FontWeight.w600,
           ),
         ),
-
         const SizedBox(width: 8),
-
         Text(
-          "3",
+          count.toString(),
           style: GoogleFonts.inter(
             color: Colors.grey.shade800,
             fontWeight: FontWeight.w700,
           ),
         ),
-
         const Spacer(),
-
         GestureDetector(
-          onTap: () {
-            Navigator.push(
+          onTap: () async {
+            final saved = await Navigator.push<bool>(
               context,
               MaterialPageRoute(
-                builder: (_) => const NewAlarmScreen(),
+                builder: (_) =>
+                    NewAlarmScreen(alarmRepository: widget.alarmRepository),
               ),
             );
+
+            if (saved == true) {
+              _refreshAlarms();
+            }
           },
           child: Text(
             '+ New',
@@ -100,14 +122,34 @@ class AlarmScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAlarmList() {
+  Widget _buildAlarmList(List<Alarm> alarms) {
     return Expanded(
-      child: ListView.builder(
-        itemCount: 5,
-        itemBuilder: (context, index) {
-          return const AlarmCard();
-        },
-      ),
+      child: alarms.isEmpty
+          ? Center(
+              child: Text(
+                'No alarms yet',
+                style: GoogleFonts.inter(
+                  color: Colors.grey.shade700,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            )
+          : ListView.builder(
+              itemCount: alarms.length,
+              itemBuilder: (context, index) {
+                final alarm = alarms[index];
+
+                return AlarmCard(
+                  alarm: alarm,
+                  onToggle: (enabled) async {
+                    await widget.alarmRepository.saveAlarm(
+                      alarm.copyWith(enabled: enabled),
+                    );
+                    _refreshAlarms();
+                  },
+                );
+              },
+            ),
     );
   }
 
@@ -116,8 +158,8 @@ class AlarmScreen extends StatelessWidget {
       children: [
         Expanded(
           child: _buildUtilityCard(
-            label: "SNOOZE",
-            value: "9 min",
+            label: 'SNOOZE',
+            value: '9 min',
             trailing: Icon(
               Icons.arrow_forward_ios_rounded,
               size: 18,
@@ -125,13 +167,11 @@ class AlarmScreen extends StatelessWidget {
             ),
           ),
         ),
-
         const SizedBox(width: 12),
-
         Expanded(
           child: _buildUtilityCard(
-            label: "VIBRATION",
-            value: "Gentle",
+            label: 'VIBRATION',
+            value: 'Gentle',
             trailing: _buildSwitch(),
           ),
         ),
@@ -149,22 +189,14 @@ class AlarmScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF161618),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: const Color(0xFF2A2A2E),
-          width: 1,
-        ),
+        border: Border.all(color: const Color(0xFF2A2A2E), width: 1),
       ),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            _buildUtilityContent(
-              label: label,
-              value: value,
-            ),
-
+            _buildUtilityContent(label: label, value: value),
             const Spacer(),
-
             trailing,
           ],
         ),
@@ -172,10 +204,7 @@ class AlarmScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildUtilityContent({
-    required String label,
-    required String value,
-  }) {
+  Widget _buildUtilityContent({required String label, required String value}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -186,7 +215,6 @@ class AlarmScreen extends StatelessWidget {
             letterSpacing: 1,
           ),
         ),
-
         Text(
           value,
           style: GoogleFonts.inter(
@@ -210,9 +238,9 @@ class AlarmScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildNextAlarmLabel() {
+  Widget _buildNextAlarmLabel(Alarm? nextAlarm) {
     return Text(
-      "Next alarm in 7h 21m · Friday",
+      nextAlarm == null ? 'No upcoming alarms' : 'Next alarm',
       style: GoogleFonts.inter(
         color: Colors.grey.shade600,
         fontWeight: FontWeight.w500,
@@ -221,17 +249,12 @@ class AlarmScreen extends StatelessWidget {
     );
   }
 
-
   Widget _buildBedtimeLabel() {
     return Row(
       children: [
-        Icon(
-          Icons.bedtime_outlined,
-          size: 16,
-          color: Colors.grey.shade600,
-        ),
+        Icon(Icons.bedtime_outlined, size: 16, color: Colors.grey.shade600),
         Text(
-          " Bedtime · 23:34",
+          ' Bedtime - 23:34',
           style: GoogleFonts.inter(
             color: Colors.grey.shade600,
             fontWeight: FontWeight.w500,
@@ -240,5 +263,20 @@ class AlarmScreen extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Alarm? _nextEnabledAlarm(List<Alarm> alarms) {
+    for (final alarm in alarms.where((alarm) => alarm.enabled)) {
+      return alarm;
+    }
+
+    return null;
+  }
+
+  String _formatTime(Alarm alarm) {
+    final hour = alarm.hour % 12 == 0 ? 12 : alarm.hour % 12;
+    final suffix = alarm.hour < 12 ? 'AM' : 'PM';
+
+    return '$hour:${alarm.minute.toString().padLeft(2, '0')} $suffix';
   }
 }

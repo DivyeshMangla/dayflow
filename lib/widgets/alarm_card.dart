@@ -1,45 +1,32 @@
+import 'package:dayflow/model/alarm.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class AlarmCard extends StatefulWidget {
-  const AlarmCard({super.key});
+class AlarmCard extends StatelessWidget {
+  const AlarmCard({super.key, required this.alarm, required this.onToggle});
 
-  @override
-  State<AlarmCard> createState() => _AlarmCardState();
-}
-
-class _AlarmCardState extends State<AlarmCard> {
-  bool _isEnabled = true;
+  final Alarm alarm;
+  final ValueChanged<bool> onToggle;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 138,
 
-      margin: const EdgeInsets.symmetric(
-        vertical: 10,
-      ),
+      margin: const EdgeInsets.symmetric(vertical: 10),
 
-      padding: const EdgeInsets.symmetric(
-        horizontal: 20,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
 
       decoration: BoxDecoration(
         color: const Color(0xFF161618),
 
         borderRadius: BorderRadius.circular(20),
 
-        border: Border.all(
-          color: const Color(0xFF2A2A2E),
-          width: 1,
-        ),
+        border: Border.all(color: const Color(0xFF2A2A2E), width: 1),
       ),
 
       child: Padding(
-        padding: const EdgeInsets.only(
-          top: 12,
-          left: 4,
-        ),
+        padding: const EdgeInsets.only(top: 12, left: 4),
 
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -47,7 +34,7 @@ class _AlarmCardState extends State<AlarmCard> {
           children: [
             Row(
               children: [
-                _buildTimeText("6:45 AM"),
+                _buildTimeText(_formatTime(alarm)),
 
                 const Spacer(),
 
@@ -55,10 +42,10 @@ class _AlarmCardState extends State<AlarmCard> {
               ],
             ),
 
-            _buildLabelText("Morning Chimes"),
+            _buildLabelText(alarm.label),
             Padding(
               padding: const EdgeInsets.only(top: 8),
-              child: _buildDayRow([1, 2, 3, 4, 5]),
+              child: _buildDayRow(alarm.repeatDays),
             ),
           ],
         ),
@@ -71,7 +58,7 @@ class _AlarmCardState extends State<AlarmCard> {
       text,
 
       style: GoogleFonts.inter(
-        color: _isEnabled ? Colors.white : Colors.grey.shade800,
+        color: alarm.enabled ? Colors.white : Colors.grey.shade800,
         fontWeight: FontWeight.w700,
         fontSize: 38,
         letterSpacing: -0.3,
@@ -84,16 +71,13 @@ class _AlarmCardState extends State<AlarmCard> {
     return Text(
       text,
 
-      style: GoogleFonts.inter(
-        color: Colors.grey.shade600,
-        fontSize: 14,
-      ),
+      style: GoogleFonts.inter(color: Colors.grey.shade600, fontSize: 14),
     );
   }
 
   Widget _buildSwitch() {
     return Switch(
-      value: _isEnabled,
+      value: alarm.enabled,
 
       activeTrackColor: const Color(0xFF7EB88A),
       activeThumbColor: Colors.white,
@@ -101,12 +85,15 @@ class _AlarmCardState extends State<AlarmCard> {
       inactiveTrackColor: const Color(0xFF1E1E22),
       inactiveThumbColor: Colors.white,
 
-      onChanged: (value) {
-        setState(() {
-          _isEnabled = value;
-        });
-      },
+      onChanged: onToggle,
     );
+  }
+
+  String _formatTime(Alarm alarm) {
+    final hour = alarm.hour % 12 == 0 ? 12 : alarm.hour % 12;
+    final suffix = alarm.hour < 12 ? 'AM' : 'PM';
+
+    return '$hour:${alarm.minute.toString().padLeft(2, '0')} $suffix';
   }
 }
 
@@ -124,18 +111,13 @@ Widget _buildDayRow(List<int> repeatDays) {
           height: 30,
 
           decoration: BoxDecoration(
-            color: isActive
-                ? const Color(0xFF7EB88A)
-                : Colors.transparent,
+            color: isActive ? const Color(0xFF7EB88A) : Colors.transparent,
 
             shape: BoxShape.circle,
 
             border: isActive
                 ? null
-                : Border.all(
-              color: const Color(0xFF2A2A2E),
-              width: 1,
-            ),
+                : Border.all(color: const Color(0xFF2A2A2E), width: 1),
           ),
 
           child: Center(
@@ -145,9 +127,7 @@ Widget _buildDayRow(List<int> repeatDays) {
               style: GoogleFonts.inter(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
-                color: isActive
-                    ? Colors.black
-                    : Colors.grey.shade600,
+                color: isActive ? Colors.black : Colors.grey.shade600,
               ),
             ),
           ),
