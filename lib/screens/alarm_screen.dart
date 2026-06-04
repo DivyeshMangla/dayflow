@@ -1,3 +1,4 @@
+import 'package:dayflow/screens/new_alarm_screen.dart';
 import 'package:dayflow/widgets/alarm_card.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -31,7 +32,7 @@ class AlarmScreen extends StatelessWidget {
 
               const SizedBox(height: 24),
 
-              _buildAlarmLabel(),
+              _buildAlarmLabel(context),
 
               const SizedBox(height: 8),
 
@@ -55,7 +56,7 @@ class AlarmScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAlarmLabel() {
+  Widget _buildAlarmLabel(BuildContext context) {
     return Row(
       children: [
         Text(
@@ -78,11 +79,21 @@ class AlarmScreen extends StatelessWidget {
 
         const Spacer(),
 
-        Text(
-          "+ New",
-          style: GoogleFonts.inter(
-            color: const Color(0xFF7EB88A),
-            fontWeight: FontWeight.w600,
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const NewAlarmScreen(),
+              ),
+            );
+          },
+          child: Text(
+            '+ New',
+            style: GoogleFonts.inter(
+              color: const Color(0xFF7EB88A),
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ],
